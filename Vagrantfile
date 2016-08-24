@@ -1,18 +1,23 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# Creates two nodes, downloads or copies "serf.zip" from local dir (if it exists), unzips it, installs it in /usr/local/bin and exec's it.
+# Note: Serf nodes need to *explicitly* join a cluster.
+
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  # All Vagrant configuration is done here. The most common configuration
-  # options are documented and commented below. For a complete reference,
-  # please see the online documentation at vagrantup.com.
+SERF_ZIP="serf.zip"
 
-  # Every Vagrant virtual environment requires a box to build off of.
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "ubuntu/trusty64"
 
   config.vm.provision "file", source: "serf-agent.conf", destination: "./serf-agent.conf"
+  if File.file?(SERF_ZIP)
+        config.vm.provision "file", source: "serf.zip", destination: "./serf.zip"
+  else 
+        config.vm.provision "shell", path: "download-serf.sh"
+  end
   config.vm.provision "shell", path: "provision.sh"
 
   config.vm.define "serf1" do |serf1|
